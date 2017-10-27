@@ -1,4 +1,4 @@
-package main
+package controllers
 
 import (
 	"bytes"
@@ -11,17 +11,18 @@ import (
 	"time"
 
 	"github.com/jmcshane/http-server/ocexec"
+	"github.com/jmcshane/http-server/service"
 )
 
 //HipchatHandler Handle hipchat POST messages from slash command
 type HipchatHandler struct {
-	tokenService *TokenService
+	TokenService *service.TokenService
 }
 
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		tokenArgs := []string{"--token", handler.tokenService.Token}
+		tokenArgs := []string{"--token", handler.TokenService.Token}
 		args := parseMessage(getMessage(w, r), tokenArgs)
 		out, stderr, err := ocexec.OcExecute(args)
 		if err != nil {

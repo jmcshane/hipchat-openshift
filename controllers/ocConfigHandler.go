@@ -1,21 +1,23 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/jmcshane/http-server/service"
 )
 
 // OcCredsHandler Handle post requests that set the current token
 type OcCredsHandler struct {
-	tokenService *TokenService
+	TokenService *service.TokenService
 }
 
 func (oc OcCredsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&oc.tokenService)
+		err := decoder.Decode(&oc.TokenService)
 		if err != nil {
 			panic(err)
 		}
