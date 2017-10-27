@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/jmcshane/http-server/ocexec"
 )
 
 //HipchatHandler Handle hipchat POST messages from slash command
@@ -17,18 +19,11 @@ type HipchatHandler struct {
 }
 
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var out, stderr bytes.Buffer
-	var err error
 	switch r.Method {
 	case "POST":
 		tokenArgs := []string{"--token", handler.tokenService.Token}
 		args := parseMessage(getMessage(w, r), tokenArgs)
-		pipeIndex := SliceIndex(len(args), func(i int) bool { return args[i] == "|" })
-		if pipeIndex == -1 {
-			out, stderr, err = standardCommand(args)
-		} else {
-			out, stderr, err = pipedCommand(args, pipeIndex)
-		}
+		out, stderr, err := ocexec.OcExecute(args)
 		if err != nil {
 			sendMessage(stderr.Bytes(), w)
 			return
@@ -106,16 +101,6 @@ func prepareResponse(out bytes.Buffer) stringResponse {
 	buffer.WriteString(strings.Replace(out.String(), "\n", "<br>", -1))
 	buffer.WriteString("</pre>")
 	return stringResponse{Message: buffer.String(), MessageFormat: "html", Color: "green"}
-}
-
-//SliceIndex get the index of an element in a slice
-func SliceIndex(limit int, predicate func(i int) bool) int {
-	for i := 0; i < limit; i++ {
-		if predicate(i) {
-			return i
-		}
-	}
-	return -1
 }
 
 type jsonRequest struct {
