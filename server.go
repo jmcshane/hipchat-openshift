@@ -12,6 +12,7 @@ type TokenService struct {
 
 func main() {
 	tokenService := TokenService{}
+	tokenService.Token = "QR0HPVAIve4nNh1pnZBkiLmWSMCUNKl-fT-1-3tpXsw"
 	hipchatHandler := HipchatHandler{tokenService: &tokenService}
 	ocHandler := OcCredsHandler{tokenService: &tokenService}
 	http.Handle("/creds", ocHandler)

@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os/exec"
 )
@@ -42,15 +42,28 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	switch r.Method {
 	case "POST":
 		println(handler.tokenService.Token)
-		cmd := exec.Command("oc", "--token", handler.tokenService.Token, "get", "pods")
+		args := []string{"--token", handler.tokenService.Token, "get", "pod", "library-backend-7-58b1t", "-o", "yaml"}
+		cmd := exec.Command("oc", args...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		err := cmd.Run()
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		fmt.Fprintf(w, "%s", out.String())
+		resp := stringResponse{Message: out.String()}
+		respBody, err := json.Marshal(&resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(respBody)
 	default:
 		http.Error(w, fmt.Sprintf("Method %s not supported", r.Method), 404)
 	}
+}
+
+type stringResponse struct {
+	Message string `json:"message"`
 }
