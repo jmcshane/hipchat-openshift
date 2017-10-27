@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jmcshane/http-server/controllers"
-	"github.com/jmcshane/http-server/service"
+	"github.com/jmcshane/hipchat-openshift/controllers"
+	"github.com/jmcshane/hipchat-openshift/service"
 )
 
 func main() {

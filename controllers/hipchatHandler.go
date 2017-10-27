@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jmcshane/http-server/ocexec"
-	"github.com/jmcshane/http-server/service"
+	"github.com/jmcshane/hipchat-openshift/ocexec"
+	"github.com/jmcshane/hipchat-openshift/service"
 )
 
 //HipchatHandler Handle hipchat POST messages from slash command

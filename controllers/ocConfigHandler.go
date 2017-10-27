@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jmcshane/http-server/service"
+	"github.com/jmcshane/hipchat-openshift/service"
 )
 
 // OcCredsHandler Handle post requests that set the current token

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/jmcshane/http-server/util"
+	"github.com/jmcshane/hipchat-openshift/util"
 )
 
 //OcExecute executes and oc command and allows passing output to grep
