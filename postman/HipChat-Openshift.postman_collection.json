@@ -1,0 +1,30 @@
+{
+	"variables": [],
+	"info": {
+		"name": "HipChat-Openshift",
+		"_postman_id": "daecfb57-4987-09ff-6ed1-05b1ab7f6d50",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "oc slash command",
+			"request": {
+				"url": "http://localhost:8080",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"event\": \"room_message\", \n\t\"item\": {\n\t\t\"message\": {\n\t\t\t\"date\": \"2017-10-27T14:19:56.844283+00:00\", \n\t\t\t\"from\": {\n\t\t\t\t\"id\": 590, \n\t\t\t\t\"links\": {\n\t\t\t\t\t\"self\": \"https://hipchat.healthpartners.com/v2/user/590\"\n\t\t\t\t\t\n\t\t\t\t}, \n\t\t\t\t\"mention_name\": \"McshaneJamesP\", \n\t\t\t\t\"name\": \"Mcshane, James P\", \n\t\t\t\t\"version\": \"DC4YF5BY\"\n\t\t\t\t\n\t\t\t}, \n\t\t\t\"id\": \"ccaf2f38-582a-4acf-b215-bf638429578e\", \n\t\t\t\"mentions\": [], \n\t\t\t\"message\": \"/oc get pod jenkins-7-xfcms -o yaml\", \n\t\t\t\"type\": \"message\"\n\t\t\t\n\t\t}, \n\t\t\"room\": {\n\t\t\t\"id\": 143, \n\t\t\t\"is_archived\": false, \n\t\t\t\"links\": {\n\t\t\t\t\"participants\": \"https://hipchat.healthpartners.com/v2/room/143/participant\", \n\t\t\t\t\"self\": \"https://hipchat.healthpartners.com/v2/room/143\", \n\t\t\t\t\"webhooks\": \"https://hipchat.healthpartners.com/v2/room/143/webhook\"\n\t\t\t}, \n\t\t\t\"name\": \"Openshift\", \n\t\t\t\"privacy\": \"public\", \n\t\t\t\"version\": \"CJPREEU0\"\n\t\t}\n\t}, \n\t\"oauth_client_id\": \"2b140229-f288-4666-aca1-4099e1ce8291\", \n\t\"webhook_id\": 108\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
