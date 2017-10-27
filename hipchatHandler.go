@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -41,19 +42,18 @@ type HipchatHandler struct {
 }
 
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var out, stderr bytes.Buffer
+	var err error
 	switch r.Method {
 	case "POST":
 		tokenArgs := []string{"--token", handler.tokenService.Token}
 		args := parseMessage(getMessage(w, r), tokenArgs)
-		cmd := exec.Command("oc", args...)
-		var out, stderr bytes.Buffer
-		cmd.Stdout = &out
-		cmd.Stderr = &stderr
-		err := cmd.Run()
-		go func() {
-			time.Sleep(3000)
-			cmd.Process.Kill()
-		}()
+		pipeIndex := SliceIndex(len(args), func(i int) bool { return args[i] == "|" })
+		if pipeIndex == -1 {
+			out, stderr, err = standardCommand(args)
+		} else {
+			out, stderr, err = pipedCommand(args, pipeIndex)
+		}
 		if err != nil {
 			sendMessage(stderr.Bytes(), w)
 			return
@@ -71,6 +71,38 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func pipedCommand(args []string, pipeIndex int) (bytes.Buffer, bytes.Buffer, error) {
+	var out, stderr2 bytes.Buffer
+	c1 := exec.Command("oc", args[0:pipeIndex]...)
+	c2 := exec.Command(args[pipeIndex+1], args[pipeIndex+2:]...)
+	r, w := io.Pipe()
+	c1.Stdout = w
+	c2.Stdin = r
+	c2.Stderr = &stderr2
+	c2.Stdout = &out
+	c1.Start()
+	c2.Start()
+	c1.Wait()
+	w.Close()
+	err := c2.Wait()
+	if err != nil {
+		return out, stderr2, err
+	}
+	return out, stderr2, nil
+}
+
+func standardCommand(args []string) (bytes.Buffer, bytes.Buffer, error) {
+	cmd := exec.Command("oc", args...)
+	var out, stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	go func() {
+		time.Sleep(3000)
+		cmd.Process.Kill()
+	}()
+	return out, stderr, err
+}
 func sendMessage(body []byte, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(body)
@@ -99,6 +131,16 @@ func prepareResponse(out bytes.Buffer) stringResponse {
 	buffer.WriteString(strings.Replace(out.String(), "\n", "<br>", -1))
 	buffer.WriteString("</pre>")
 	return stringResponse{Message: buffer.String(), MessageFormat: "html", Color: "green"}
+}
+
+//SliceIndex get the index of an element in a slice
+func SliceIndex(limit int, predicate func(i int) bool) int {
+	for i := 0; i < limit; i++ {
+		if predicate(i) {
+			return i
+		}
+	}
+	return -1
 }
 
 type jsonRequest struct {
