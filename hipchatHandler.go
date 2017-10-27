@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -42,7 +43,8 @@ type HipchatHandler struct {
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		args := []string{"--token", handler.tokenService.Token, "rsh", "sonarqube-2-827w1"}
+		tokenArgs := []string{"--token", handler.tokenService.Token}
+		args := parseMessage(getMessage(w, r), tokenArgs)
 		cmd := exec.Command("oc", args...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
@@ -55,7 +57,7 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		resp := stringResponse{Message: out.String()}
+		resp := prepareResponse(out)
 		respBody, err := json.Marshal(&resp)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -68,6 +70,46 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-type stringResponse struct {
+func getMessage(rw http.ResponseWriter, req *http.Request) string {
+	decoder := json.NewDecoder(req.Body)
+	var t jsonRequest
+	err := decoder.Decode(&t)
+	if err != nil {
+		panic(err)
+	}
+	defer req.Body.Close()
+	return t.Item.Message.Message
+}
+
+func parseMessage(message string, tokenArgs []string) []string {
+	ocArgs := strings.Replace(message, "/oc ", "", -1)
+	args := append(tokenArgs, strings.Split(ocArgs, " ")...)
+	return args
+}
+
+func prepareResponse(out bytes.Buffer) stringResponse {
+	var buffer bytes.Buffer
+	buffer.WriteString("<pre>")
+	buffer.WriteString(strings.Replace(out.String(), "\n", "<br>", -1))
+	buffer.WriteString("</pre>")
+	return stringResponse{Message: buffer.String(), MessageFormat: "html", Color: "green"}
+}
+
+type jsonRequest struct {
+	Event string `json:"event"`
+	Item  item   `json:"item"`
+}
+
+type item struct {
+	Message message `json:"message"`
+}
+
+type message struct {
 	Message string `json:"message"`
+}
+
+type stringResponse struct {
+	Message       string `json:"message"`
+	MessageFormat string `json:"message_format"`
+	Color         string `json:"color"`
 }
