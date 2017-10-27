@@ -20,7 +20,7 @@ func (oc OcCredsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		defer r.Body.Close()
-		fmt.Fprintf(w, "Test")
+		w.WriteHeader(http.StatusCreated)
 	default:
 		http.Error(w, fmt.Sprintf("Method %s not supported", r.Method), 404)
 	}
