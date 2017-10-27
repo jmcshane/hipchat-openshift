@@ -4,3 +4,8 @@ package service
 type TokenService struct {
 	Token string
 }
+
+//NewTokenService instantiates a token service
+func NewTokenService() *TokenService {
+	return &TokenService{}
+}

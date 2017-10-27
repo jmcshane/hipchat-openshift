@@ -16,13 +16,18 @@ import (
 
 //HipchatHandler Handle hipchat POST messages from slash command
 type HipchatHandler struct {
-	TokenService *service.TokenService
+	tokenService *service.TokenService
+}
+
+//NewHipchatHandler creates a handler for messages from Hipchat
+func NewHipchatHandler(tokenService *service.TokenService) *HipchatHandler {
+	return &HipchatHandler{tokenService: tokenService}
 }
 
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		tokenArgs := []string{"--token", handler.TokenService.Token}
+		tokenArgs := []string{"--token", handler.tokenService.Token}
 		args := parseMessage(getMessage(w, r), tokenArgs)
 		out, stderr, err := ocexec.OcExecute(args)
 		if err != nil {

@@ -10,14 +10,19 @@ import (
 
 // OcCredsHandler Handle post requests that set the current token
 type OcCredsHandler struct {
-	TokenService *service.TokenService
+	tokenService *service.TokenService
+}
+
+//NewOcCredsHandler instantiates a credentials handler
+func NewOcCredsHandler(tokenService *service.TokenService) *OcCredsHandler {
+	return &OcCredsHandler{tokenService: tokenService}
 }
 
 func (oc OcCredsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&oc.TokenService)
+		err := decoder.Decode(&oc.tokenService)
 		if err != nil {
 			panic(err)
 		}
