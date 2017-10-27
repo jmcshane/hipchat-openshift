@@ -46,15 +46,16 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		tokenArgs := []string{"--token", handler.tokenService.Token}
 		args := parseMessage(getMessage(w, r), tokenArgs)
 		cmd := exec.Command("oc", args...)
-		var out bytes.Buffer
+		var out, stderr bytes.Buffer
 		cmd.Stdout = &out
+		cmd.Stderr = &stderr
 		err := cmd.Run()
 		go func() {
 			time.Sleep(3000)
 			cmd.Process.Kill()
 		}()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			sendMessage(stderr.Bytes(), w)
 			return
 		}
 		resp := prepareResponse(out)
@@ -63,11 +64,16 @@ func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(respBody)
+		sendMessage(respBody, w)
 	default:
+		sendMessage([]byte("Bad Message"), w)
 		http.Error(w, fmt.Sprintf("Method %s not supported", r.Method), 404)
 	}
+}
+
+func sendMessage(body []byte, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
 func getMessage(rw http.ResponseWriter, req *http.Request) string {
