@@ -41,8 +41,7 @@ type HipchatHandler struct {
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		println(handler.tokenService.Token)
-		args := []string{"--token", handler.tokenService.Token, "get", "pod", "library-backend-7-58b1t", "-o", "yaml"}
+		args := []string{"--token", handler.tokenService.Token, "get", "pods"}
 		cmd := exec.Command("oc", args...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
