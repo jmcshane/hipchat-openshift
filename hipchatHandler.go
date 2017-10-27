@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"time"
 )
 
 var (
@@ -41,11 +42,15 @@ type HipchatHandler struct {
 func (handler HipchatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		args := []string{"--token", handler.tokenService.Token, "get", "pods"}
+		args := []string{"--token", handler.tokenService.Token, "rsh", "sonarqube-2-827w1"}
 		cmd := exec.Command("oc", args...)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		err := cmd.Run()
+		go func() {
+			time.Sleep(3000)
+			cmd.Process.Kill()
+		}()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
