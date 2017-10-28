@@ -3,7 +3,7 @@ podTemplate(label: 'mypod', cloud:'openshift',containers: [
   ]) {
     node('mypod') {
         stage('Get a Golang project') {
-            git url: 'https://github.com/jmcshane/hipchat-openshift.git'
+            checkout scm
             container('golang') {
                 stage('Build a Go project') {
                     sh """
