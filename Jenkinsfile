@@ -1,4 +1,4 @@
-podTemplate(label: 'mypod', cloud:'openshift',containers: [
+podTemplate(label: 'mypod', serviceAccount: 'jenkins', cloud:'openshift',containers: [
     containerTemplate(name: 'golang', image: 'golang:1.9.2', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'oc', image:'registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7:latest',
                     ttyEnabled: true, command: 'cat')
