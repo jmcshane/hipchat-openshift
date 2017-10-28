@@ -16,15 +16,13 @@ podTemplate(label: 'mypod', serviceAccount: 'jenkins', cloud:'openshift',contain
                     cd /go/src/github.com/jmcshane/hipchat-openshift
                     go test ./...
                     go build .
-                    ls -al
                     cp /go/src/github.com/jmcshane/hipchat-openshift/hipchat-openshift /opt/binary/main
                     """
                 }
             }
             stage('Send Binary to build') {
               container('oc') {
-                  sh "sleep 20"
-                  sh "oc start-build server --from-file=/opt/binary/main"
+                  sh "oc start-build server --follow --from-file=/opt/binary/main"
                 }
             }
         }
